@@ -1,0 +1,80 @@
+import pandas as pd
+from sklearn.tree import DecisionTreeClassifier, export_text
+from sklearn.preprocessing import LabelEncoder
+from sklearn.impute import SimpleImputer
+# ________________________________________________
+
+def prepare_data(data):
+    df = pd.DataFrame(data)
+    X = df.iloc[:, :-1].copy()
+    y = df.iloc[:, -1].copy()
+
+    for col in X.columns:
+        X.loc[:, col] = X[col].fillna("Missing")
+        le = LabelEncoder()
+        X.loc[:, col] = le.fit_transform(X[col].astype(str))
+
+    y_encoder = LabelEncoder()
+    y = y_encoder.fit_transform(y)
+
+    return X, y, y_encoder
+# ________________________________________________
+
+def show_tree(model, feature_names, test_case):
+    print("\n" + "=" * 50)
+    print(test_case)
+    print("=" * 50)
+    print(export_text(model, feature_names=feature_names))
+    print("Tree Depth:", model.get_depth())
+    print("No. of Leaves:", model.get_n_leaves())
+
+
+# ==========================================
+# TEST CASE 1: PASSED
+# ==========================================
+
+play_tennis = [
+    ["Sunny", "Hot", "High", "Weak", "No"],
+    ["Sunny", "Hot", "High", "Strong", "No"],
+    ["Overcast", "Hot", "High", "Weak", "Yes"],
+    ["Rain", "Mild", "High", "Weak", "Yes"],
+    ["Rain", "Cool", "Normal", "Weak", "Yes"],
+    ["Rain", "Cool", "Normal", "Strong", "No"],
+    ["Overcast", "Cool", "Normal", "Strong", "Yes"],
+    ["Sunny", "Mild", "High", "Weak", "No"],
+    ["Sunny", "Cool", "Normal", "Weak", "Yes"],
+    ["Rain", "Mild", "Normal", "Weak", "Yes"],
+    ["Sunny", "Mild", "Normal", "Strong", "Yes"],
+    ["Overcast", "Mild", "High", "Strong", "Yes"],
+    ["Overcast", "Hot", "Normal", "Weak", "Yes"],
+    ["Rain", "Mild", "High", "Strong", "No"]
+]
+
+X, y, encoder = prepare_data(play_tennis)
+
+model = DecisionTreeClassifier(criterion="entropy", random_state=42)
+model.fit(X, y)
+
+show_tree(model, list(X.columns),
+          "TEST CASE 1: Passed - Play Tennis")
+
+
+# ==========================================
+# TEST CASE 2: FAILED
+# ==========================================
+
+missing_data = [
+    ["Sunny", "Hot", "Yes"],
+    ["Rain", None, "No"],
+    ["Overcast", "Mild", "Yes"],
+    [None, "Cool", "Yes"],
+    ["Sunny", "Cool", "No"]
+]
+
+X, y, encoder = prepare_data(missing_data)
+
+model = DecisionTreeClassifier(criterion="entropy", random_state=42)
+model.fit(X, y)
+
+show_tree(model, list(X.columns),
+          "TEST CASE 2: Failed - Missing Values")
