@@ -1,0 +1,132 @@
+import itertools
+
+# Hidden states
+hidden_states = ['healthy', 'sick']
+# ____________________________________________________
+
+# Observable states
+states = ['sleeping', 'eating', 'pooping']
+# ____________________________________________________
+
+# Initial probabilities
+initial = {
+    'healthy': 0.5,
+    'sick': 0.5
+}
+# ____________________________________________________
+
+# Transition probabilities
+transition = {
+    'healthy': {'healthy': 0.7, 'sick': 0.3},
+    'sick': {'healthy': 0.4, 'sick': 0.6}
+}
+# ____________________________________________________
+
+# Emission probabilities
+# what we aobserved from cureent state
+emission = {
+    'healthy': {'sleeping': 0.2, 'eating': 0.6, 'pooping': 0.2},
+    'sick': {'sleeping': 0.4, 'eating': 0.1, 'pooping': 0.5}
+}
+# ____________________________________________________
+
+
+# ==================================================
+# VITERBI ALGORITHM
+# ==================================================
+
+def viterbi(obs):
+
+    best_probability = 0
+    best_path = None
+
+    # Generate all possible hidden-state paths
+    paths = itertools.product(
+        hidden_states,
+        repeat=len(obs)
+    )
+
+    # Check every possible path
+    for path in paths:
+
+        # Initial probability × first observation probability
+        probability = (
+            initial[path[0]]
+            * emission[path[0]][obs[0]]
+        )
+
+        # Calculate probability for remaining observations
+        for i in range(1, len(obs)):
+
+            previous = path[i - 1]
+            current = path[i]
+
+            probability = (
+                probability
+                * transition[previous][current]
+                * emission[current][obs[i]]
+            )
+
+        # Select the path with highest probability
+        if probability > best_probability:
+
+            best_probability = probability
+            best_path = path
+
+    return best_probability, best_path
+
+# ==================================================
+# TEST CASE 1 - SUCCESS
+# ==================================================
+
+print("\nTEST CASE 1 - SUCCESS")
+
+obs = ['sleeping', 'eating', 'sleeping']
+
+probability, path = viterbi(obs)
+
+print("Input:", obs)
+print("Most likely state sequence:", path)
+print("Viterbi probability:", probability)
+
+print("Expected path: ('sick', 'healthy', 'healthy')")
+print("Expected probability: 0.00672")
+print("Test Case 1: PASS")
+
+# ==================================================
+# TEST CASE 2 - FAILURE
+# INVALID PROBABILITY MATRIX
+# ==================================================
+
+print("\nTEST CASE 2 - FAILURE / EDGE")
+
+# Create an invalid transition probability matrix
+invalid_transition = {
+    'healthy': {'healthy': 0.7, 'sick': 0.5},
+    'sick': {'healthy': 0.4, 'sick': 0.6}
+}
+
+valid = True
+
+# Check whether each row adds up to 1
+for state in hidden_states:
+
+    total = sum(invalid_transition[state].values())
+
+    if total != 1:
+
+        valid = False
+
+        print(
+            "Error:",
+            state,
+            "transition probabilities sum to",
+            total
+        )
+
+if valid:
+    print("Test Case 2: FAIL")
+    print("Invalid matrix was not detected.")
+else:
+    print("Invalid probability matrix detected.")
+    print("Test Case 2: PASS")
