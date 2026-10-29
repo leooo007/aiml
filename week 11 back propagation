@@ -1,0 +1,35 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.neural_network import MLPRegressor
+from sklearn.metrics import mean_squared_error
+# ________________________________________________________
+
+def show(title, X, y, hidden=3, lr=0.1, epochs=10000):
+    print(f"\n{'='*55}\n{title}\n{'='*55}")
+    m = MLPRegressor(hidden_layer_sizes=(hidden,),
+                     learning_rate_init=lr,
+                     max_iter=epochs, random_state=42)
+    m.fit(X, y)
+    p = m.predict(X)
+    print("Input:\n", X)
+    print("Actual:", y)
+    print("Predicted:", np.round(p, 2))
+    return m, p
+
+# ======================
+# Test 1: Non-linear XOR
+# ======================
+X1 = np.array([[0,0],[0,1],[1,0],[1,1]])
+y1 = np.array([0,100,100,0])
+
+show("TEST 1: NON-LINEAR DATASET", X1, y1)
+print("Reason: XOR is non-linear and requires a hidden layer.")
+
+# ======================
+# Test 2: Very high learning rate
+# ======================
+X = np.array([[2,9],[1,5],[3,6]])
+y = np.array([92,86,89])
+m, p = show("TEST 2: VERY HIGH LEARNING RATE", X, y, lr=10, epochs=100)
+print("Learning Rate: 10")
+print("Reason: A very high learning rate can make training unstable.")
