@@ -1,0 +1,60 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC, OneClassSVM
+# ______________________________________________________________
+
+# Load Iris dataset
+iris = load_iris()
+X, y = iris.data, iris.target
+
+# =========================================================
+# 1. TWO CLASS + LINEAR SVM
+# Setosa(0) vs Versicolor(1)
+# =========================================================
+
+X2 = X[y != 2]
+y2 = y[y != 2]
+
+# Use only 2 features for plotting
+X2 = X2[:, :2]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X2, y2, test_size=0.2, random_state=42
+)
+
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+svm = SVC(kernel="linear",C=1)
+svm.fit(X_train, y_train)
+
+print("Test Case 1:")
+print("Accuracy:", svm.score(X_test, y_test))
+print("Support vectors:\n", svm.support_vectors_)
+
+# =========================================================
+# 2. OVERLAPPING CLASSES
+# Versicolor(1) vs Virginica(2)
+# =========================================================
+
+X3 = X[y != 0]
+y3 = y[y != 0]
+
+Xtr, Xte, ytr, yte = train_test_split(
+    X3, y3, test_size=0.2, random_state=42
+)
+
+scaler = StandardScaler()
+Xtr = scaler.fit_transform(Xtr)
+Xte = scaler.transform(Xte)
+
+svm2 = SVC(kernel="linear", C=1)
+svm2.fit(Xtr, ytr)
+
+print("\nTest Case 2:")
+print("Overlapping classes accuracy:",
+      svm2.score(Xte, yte))
