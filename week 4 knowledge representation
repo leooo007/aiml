@@ -1,0 +1,36 @@
+from sympy import symbols, Not, Implies, Xor, satisfiable
+
+Rain = symbols('Rain')
+Harry_Visited_Hagrid = symbols('Harry_Visited_Hagrid')
+Harry_Visited_Dumbledore = symbols('Harry_Visited_Dumbledore')
+
+def run_test(test_name, kb):
+    print("\n" + "=" * 50)
+    print(test_name)
+    print("=" * 50)
+    result = satisfiable(kb)
+    print("Satisfiable: " + str(result))
+    if result is False:
+        print("Not Satisfiable model (Contradiction)")
+    elif Rain in result:
+        if result[Rain]:
+            print("It rained Today")
+        else:
+            print("There is no rain Today")
+    else:
+        print("Rain cannot be determined")
+
+# TEST CASES:
+# case-1(Passed):
+kb1 = (
+    Implies(Not(Rain), Harry_Visited_Hagrid) &
+    Xor(Harry_Visited_Hagrid, Harry_Visited_Dumbledore) &
+    Harry_Visited_Dumbledore
+)
+run_test("Test case-1: ", kb1)
+
+# case-2(Failed):
+kb2 = (
+    Implies(Not(Rain), Harry_Visited_Hagrid)
+)
+run_test("Test case-2: ", kb2)
