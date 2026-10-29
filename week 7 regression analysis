@@ -1,0 +1,126 @@
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from google.colab import files
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+# ______________________________________
+
+# UPLOAD SALARY DATASET
+uploaded = files.upload()
+filename = next(iter(uploaded))
+dataset = pd.read_csv(filename)
+# ______________________________________
+
+print("========== SALARY DATASET ==========")
+print(dataset.head())
+print("\nNumber of rows:", len(dataset))
+# ______________________________________
+
+# PREPARE DATA
+X = dataset[['YearsExperience']].values
+y = dataset['Salary'].values
+
+# ============================================================
+# TEST CASE 1: LINEAR DATA POINTS
+# ============================================================
+print("\n==============================================")
+print("TEST CASE 1: LINEAR DATA POINTS")
+print("==============================================")
+
+model1 = LinearRegression()
+model1.fit(X, y)
+
+slope1 = model1.coef_[0]
+intercept1 = model1.intercept_
+
+print("Slope:", slope1)
+print("Intercept:", intercept1)
+print("\nRegression Equation:")
+print("Salary =", slope1, "* YearsExperience +", intercept1)
+
+if slope1 != 0:
+    print("\nRESULT: PASS")
+    print("Best-fit regression line generated successfully.")
+else:
+    print("\nRESULT: FAIL")
+
+# ============================================================
+# TEST CASE 2: OUTLIER-HEAVY DATA
+# ============================================================
+print("\n==============================================")
+print("TEST CASE 2: OUTLIER-HEAVY DATA")
+print("==============================================")
+
+y5 = y.copy()
+highest_salary_index = np.argmax(y5)
+original_salary = y5[highest_salary_index]
+y5[highest_salary_index] = original_salary * 5
+
+print("Original highest salary:", original_salary)
+print("Outlier salary:", y5[highest_salary_index])
+
+normal_model = LinearRegression()
+normal_model.fit(X, y)
+
+outlier_model = LinearRegression()
+outlier_model.fit(X, y5)
+
+normal_slope = normal_model.coef_[0]
+outlier_slope = outlier_model.coef_[0]
+
+print("\nSlope before outlier:", normal_slope)
+print("Slope after outlier:", outlier_slope)
+
+normal_prediction = normal_model.predict(X)
+outlier_prediction = outlier_model.predict(X)
+
+normal_mse = mean_squared_error(y, normal_prediction)
+outlier_mse = mean_squared_error(y, outlier_prediction)
+
+print("\nMSE before outlier:", normal_mse)
+print("MSE after outlier:", outlier_mse)
+
+if outlier_mse > normal_mse:
+    print("\nRESULT: PASS")
+    print("Model error increased because of the outlier.")
+else:
+    print("\nRESULT: OUTLIER DID NOT INCREASE ERROR")
+
+# ============================================================
+# TRAINING DATA GRAPH
+# ============================================================
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+model2 = LinearRegression()
+model2.fit(X_train, y_train)
+
+# Sort values so the regression line displays correctly
+sorted_indices = np.argsort(X_train[:, 0])
+X_sorted = X_train[sorted_indices]
+y_pred_sorted = model2.predict(X_sorted)
+
+plt.figure(figsize=(8, 5))
+plt.scatter(X_train, y_train, color='red', label='Training Data')
+plt.plot(X_sorted, y_pred_sorted, color='blue',
+         label='Regression Line')
+
+plt.title("Salary vs Years of Experience - Training Set")
+plt.xlabel("Years of Experience")
+plt.ylabel("Salary")
+plt.legend()
+plt.show()
+
+# ============================================================
+# FINAL TEST SUMMARY
+# ============================================================
+print("\n================================================")
+print("             TEST CASE SUMMARY")
+print("================================================")
+print("Test Case 1: Linear Data -> Best-fit line generated")
+print("Test Case 2: Outlier Data -> Error comparison completed")
+print("================================================")
