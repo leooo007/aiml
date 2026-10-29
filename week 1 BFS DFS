@@ -1,0 +1,55 @@
+from collections import deque
+# BFS Logic:
+def bfs(graph, start):
+    visited=set()
+    queue = deque([start])   
+    traversed = []
+    visited.add(start)
+    while queue :
+        node = queue.popleft()
+        traversed.append(node)
+        for neigh in graph[node]:
+            if neigh not in visited:
+                visited.add(neigh)
+                queue.append(neigh)
+    return traversed
+# DFS Logic
+def dfs(graph, start) :
+    visited= set()
+    traversed = []
+    def dfs_in(node) :
+        visited.add(node)
+        traversed.append(node)
+        for neigh in graph[node]:
+            if neigh not in visited:
+                dfs_in(neigh)
+    dfs_in(start)
+    return traversed
+
+# TEST CASES:
+# case-1(Passed): Connective Graph
+graph1 = {
+    'A':['B','C'],
+    'B':['A','D'],
+    'C':['A','E'],
+    'D':['B'],
+    'E':['C']
+    }
+
+# case-2(Failed): Disconnected Graph
+graph5={
+    'A':['B'],
+    'B':['A','C'],
+    'C':['B'],
+    'D':['E'],
+    'E':['D']
+}
+
+# OUTPUTS:
+print("<--------------BFS-------------->")
+print("Graph-1: Connective: ",bfs(graph1, 'A'))
+print("Graph-2: Disconnective: ",bfs(graph5, 'A'))
+
+print("<--------------DFS-------------->")
+print("Graph-1: Connective: ",dfs(graph1, 'A'))
+print("Graph-2: Disconnective: ",dfs(graph5, 'A'))
